@@ -2,7 +2,7 @@ bl_info = {
     "name": "PixelUV",
     "description": "Helps pack UVs in a seperate channel",
     "author": "Cvrrytrash",
-    "version": (1, 0),
+    "version": (0, 0),
     "blender": (3, 0, 0),
     "location": "Toolbar",
     "category": "Object"
