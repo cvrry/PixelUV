@@ -2,7 +2,7 @@ bl_info = {
     "name": "PixelUV",
     "description": "Helps pack UVs in a seperate channel",
     "author": "Cvrrytrash",
-    "version": (0, 0),
+    "version": (0, 2 ),
     "blender": (3, 0, 0),
     "location": "Toolbar",
     "category": "Object"
@@ -15,6 +15,7 @@ from operator import attrgetter
 from bpy.props import (StringProperty, PointerProperty)
 
 from bpy.types import (Panel, PropertyGroup,)
+
 
 class Properties(PropertyGroup):
     zone_tag_input: StringProperty(
@@ -32,21 +33,42 @@ class Operators(bpy.types.Operator):
 
         collection = context.collection
         zone_tag = mytool.zone_tag_input
+        zone_tag_len = len(zone_tag)
         objects = []
+        vg_names_list = []
 
-        #getting_objects_from_collection
+        #getting_objects_&_vertex_groups_from_collection
         for obj in collection.objects:
             objects.append(obj)
-            vg_names = [vg.name for vg in obj.vertex_groups if vg.name[:len(zone_tag)] == zone_tag]
+            vg_names_list.append([vg.name for vg in obj.vertex_groups if vg.name[:zone_tag_len] == zone_tag])
 
         objects.sort(key = attrgetter('name'))
-        levels = len(objects)
+        num_levels = len(objects)
+        num_zones = max(len(vg_names) for vg_names in vg_names_list)
 
-        for lvl, obj in enumerate(objects):
-            if "pixelUVmap" not in obj.data.uv_layers:
-                obj.data.uv_layers.new(name="pixelUVmap")
+        #loop_for_each_obj_aka_level
+        for lvl_id, obj in enumerate(objects):
+            uv_map_name = "pixelUVmap"
 
-            uvMap = obj.data.uv_layers["pixelUVmap"]
+            #checks_for_UV_map_exist_creates_if_absent
+            if uv_map_name not in obj.data.uv_layers:
+                obj.data.uv_layers.new(name=uv_map_name)
+            uvMap = obj.data.uv_layers[uv_map_name]
+            mesh = obj.data
+
+            #loop_for_each_vertex_group_aka_zone
+            for vg_name in vg_names_list[lvl_id]:
+                zone_id = int(vg_name[zone_tag_len:])
+                uv_coord = ((zone_id + 0.5)/num_zones, (lvl_id + 0.5)/num_levels)
+
+                vg = obj.vertex_groups.get(vg_name)
+                if vg is not None:
+                    vertex_indices = [v.index for v in obj.data.vertices if vg.index in [vg.group for vg in v.groups]]
+
+                    for face in obj.data.polygons:
+                        for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+                            if vert_idx in vertex_indices:
+                                uvMap.data[loop_idx].uv = uv_coord
 
         return {'FINISHED'}
 
@@ -75,6 +97,8 @@ classes = (
     PixelUV
 )
 
+
+#registers_classes
 def register():
     from bpy.utils import register_class
     for cls in classes:
