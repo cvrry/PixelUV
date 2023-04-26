@@ -1,8 +1,9 @@
 # PixelUV
-An addon that "unwraps" UVs according to zones onto Pixels
 
-Takes a family of objects and maps each zone of each object onto a single unique point on a grid.
+A blender addon that takes a family of objects with named vertex groups and maps them onto a single unique point on a UV Map
 
-x -> zone_id
+Each object is a "level" and each vertex group is a "zone"
 
-y -> object_id
+Obj Data  ->  UVmap
+zones     ->  X axis
+levels    ->  Y axis
