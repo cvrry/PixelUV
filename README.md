@@ -23,10 +23,10 @@ With 3 levels and 3 Zones, we get UVs like this <br/>
 
 ## Usage
 
-- Make a collection with the family of objects `levels` <br\>
+- Make a collection with the family of objects `levels` (the numbering enforces the order) <br\>
 ![image](https://user-images.githubusercontent.com/15632432/234530681-8144c355-12f5-4e74-8c8a-eba4dfa3c338.png)
 
-+ Create vertex Groups with a common starting tag e.g. __bz___<br/>
++ Create vertex Groups with a common starting tag e.g. __bz___ (the numbering matters decides the location) <br/>
 ![image](https://user-images.githubusercontent.com/15632432/234530971-555adfaa-2a4e-468a-97ca-70a4a2a7b43c.png) <br/>
 _Make Sure to all the vertices belong to atleast one vertex group_
 
