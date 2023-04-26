@@ -4,6 +4,6 @@ A blender addon that takes a family of objects with named vertex groups and maps
 
 Each object is a "level" and each vertex group is a "zone"
 
-Obj Data  ->  UVmap
-zones     ->  X axis
-levels    ->  Y axis
+Obj Data  ->  UVmap<br />
+zones     ->  X axis<br />
+levels    ->  Y axis<br />
