@@ -2,13 +2,14 @@ bl_info = {
     "name": "PixelUV",
     "description": "Helps pack UVs in a seperate channel",
     "author": "Cvrrytrash",
-    "version": (0, 2 ),
+    "version": (1, 0 ),
     "blender": (3, 0, 0),
     "location": "Toolbar",
     "category": "Object"
 }
 
 import bpy
+import bmesh
 
 from operator import attrgetter
 
@@ -56,19 +57,36 @@ class Operators(bpy.types.Operator):
             uvMap = obj.data.uv_layers[uv_map_name]
             mesh = obj.data
 
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+            uv_layer = bm.loops.layers.uv[uv_map_name]
+
             #loop_for_each_vertex_group_aka_zone
             for vg_name in vg_names_list[lvl_id]:
                 zone_id = int(vg_name[zone_tag_len:])
-                uv_coord = ((zone_id + 0.5)/num_zones, (lvl_id + 0.5)/num_levels)
+
+                uv_coord = ((zone_id + 0.5)/num_zones,1 - (lvl_id + 0.5)/num_levels)
 
                 vg = obj.vertex_groups.get(vg_name)
                 if vg is not None:
                     vertex_indices = [v.index for v in obj.data.vertices if vg.index in [vg.group for vg in v.groups]]
 
-                    for face in obj.data.polygons:
-                        for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-                            if vert_idx in vertex_indices:
-                                uvMap.data[loop_idx].uv = uv_coord
+                    #for face in obj.data.polygons:
+                    #    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+                    #        if vert_idx in vertex_indices:
+                    #            uvMap.data[loop_idx].uv = uv_coord
+
+
+
+                    for face in bm.faces:
+                        for loop in face.loops:
+                            if all(vert.index in vertex_indices for vert in face.verts):
+                                loop[uv_layer].uv = uv_coord
+                    
+                    bm.to_mesh(mesh)
+
+                #print(uv_coord)
+            print("\n")
 
         return {'FINISHED'}
 
