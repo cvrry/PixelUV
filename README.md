@@ -35,3 +35,8 @@ Hit the `Generate Pixel UV map` button
 ![image](https://user-images.githubusercontent.com/15632432/234532549-cd47b779-ba07-4bf2-9b78-3f6a8779702a.png)
 
 UVs should now be arranged
+
+
+### Note:
+The levels will just be arranged in ascenting order, while the zones will be arranged according to the numbering.
+This is done to allow for missing limbs or parts across the levels, but be tolerant towards naming of the levels.
