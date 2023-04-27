@@ -2,13 +2,16 @@ bl_info = {
     "name": "PixelUV",
     "description": "Helps pack UVs in a seperate channel",
     "author": "Cvrrytrash",
-    "version": (0, 2 ),
+    "version": (1, 2 ),
     "blender": (3, 0, 0),
     "location": "Toolbar",
     "category": "Object"
 }
 
 import bpy
+#import bmesh
+
+#are you modifying the add-on? have fun!
 
 from operator import attrgetter
 
@@ -16,6 +19,14 @@ from bpy.props import (StringProperty, PointerProperty)
 
 from bpy.types import (Panel, PropertyGroup,)
 
+def check_if_belongs(obj, verts, vg_name):
+    for i in verts:
+        try:
+            obj.vertex_groups[vg_name].weight(i)
+        except:
+            return False
+        
+    return True
 
 class Properties(PropertyGroup):
     zone_tag_input: StringProperty(
@@ -37,6 +48,10 @@ class Operators(bpy.types.Operator):
         objects = []
         vg_names_list = []
 
+        uv_map_name = 'pixelUVmap'
+
+        print("starting\n")
+
         #getting_objects_&_vertex_groups_from_collection
         for obj in collection.objects:
             objects.append(obj)
@@ -48,27 +63,31 @@ class Operators(bpy.types.Operator):
 
         #loop_for_each_obj_aka_level
         for lvl_id, obj in enumerate(objects):
-            uv_map_name = "pixelUVmap"
+
+            mesh = obj.data
 
             #checks_for_UV_map_exist_creates_if_absent
             if uv_map_name not in obj.data.uv_layers:
                 obj.data.uv_layers.new(name=uv_map_name)
-            uvMap = obj.data.uv_layers[uv_map_name]
-            mesh = obj.data
+
+            uv_map = obj.data.uv_layers[uv_map_name]
 
             #loop_for_each_vertex_group_aka_zone
             for vg_name in vg_names_list[lvl_id]:
                 zone_id = int(vg_name[zone_tag_len:])
-                uv_coord = ((zone_id + 0.5)/num_zones, (lvl_id + 0.5)/num_levels)
 
-                vg = obj.vertex_groups.get(vg_name)
-                if vg is not None:
-                    vertex_indices = [v.index for v in obj.data.vertices if vg.index in [vg.group for vg in v.groups]]
+                uv_coord = ((zone_id + 0.5)/num_zones,1 - (lvl_id + 0.5)/num_levels)
 
-                    for face in obj.data.polygons:
-                        for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-                            if vert_idx in vertex_indices:
-                                uvMap.data[loop_idx].uv = uv_coord
+                for face in obj.data.polygons:
+                    for loop in face.loop_indices:
+                        if(check_if_belongs(obj, face.vertices, vg_name)):
+                            uv_map.data[loop].uv = uv_coord
+
+                print("[vertex group] ", vg_name, "set")
+            
+                    
+            mesh.update()   
+            print("[object] ",obj.name, "UV set\n")
 
         return {'FINISHED'}
 
